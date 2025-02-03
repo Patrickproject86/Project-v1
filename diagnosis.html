@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常见传染病诊断</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div class="page-container">
+    <header class="site-header">
+        <div class="header-logo">
+            <h1 class="site-title">常见传染病诊断&科普</h1>
+        </div>
+        <nav class="site-nav">
+            <ul>
+                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> 首页</a></li>
+                <li><a href="diagnosis.html" class="nav-link active"><i class="fas fa-stethoscope"></i> 诊断页面</a></li>
+                <li><a href="popularize.html" class="nav-link"><i class="fas fa-book"></i> 科普页面</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="site-main">
+        <section class="diagnosis-container">
+            <h2>常见传染病诊断</h2>
+            <form id="diagnosis-form">
+                <label for="fever">是否发热：</label>
+                <select id="fever" name="fever" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="cough">是否咳嗽：</label>
+                <select id="cough" name="cough" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="sore-throat">是否喉咙痛：</label>
+                <select id="sore-throat" name="sore-throat" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="muscle-pain">是否肌肉酸痛：</label>
+                <select id="muscle-pain" name="muscle-pain" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="fatigue">是否疲劳：</label>
+                <select id="fatigue" name="fatigue" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="runny-nose">是否流鼻涕：</label>
+                <select id="runny-nose" name="runny-nose" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="diarrhea">是否腹泻：</label>
+                <select id="diarrhea" name="diarrhea" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="vomiting">是否呕吐：</label>
+                <select id="vomiting" name="vomiting" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="headache">是否头痛：</label>
+                <select id="headache" name="headache" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="joint-pain">是否关节痛：</label>
+                <select id="joint-pain" name="joint-pain" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <label for="rash">是否皮疹：</label>
+                <select id="rash" name="rash" required>
+                    <option value="">请选择</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                </select>
+
+                <button type="submit">获取诊断</button>
+            </form>
+            <p id="result" style="margin-top: 20px; font-weight: bold; color: #333;"></p>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <a href="feedback.html" class="feedback-link">用户反馈 <i class="fas fa-comments"></i></a>
+    </footer>
+</div>
+
+<script>
+    document.getElementById('diagnosis-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表单默认提交行为
+
+        // 获取用户输入的症状
+        const symptoms = {
+            fever: document.getElementById('fever').value,
+            cough: document.getElementById('cough').value,
+            'sore-throat': document.getElementById('sore-throat').value,
+            'muscle-pain': document.getElementById('muscle-pain').value,
+            fatigue: document.getElementById('fatigue').value,
+            'runny-nose': document.getElementById('runny-nose').value,
+            diarrhea: document.getElementById('diarrhea').value,
+            vomiting: document.getElementById('vomiting').value,
+            headache: document.getElementById('headache').value,
+            'joint-pain': document.getElementById('joint-pain').value,
+            rash: document.getElementById('rash').value
+        };
+
+        // 调用诊断函数并显示结果
+        const result = diagnose(symptoms);
+        document.getElementById('result').innerText = result;
+    });
+
+    // 诊断函数
+    function diagnose(symptoms) {
+        const diseasePatterns = [
+            { disease: "甲型流感", symptoms: ["fever", "cough", "sore-throat", "muscle-pain"] },
+            { disease: "乙型流感", symptoms: ["fever", "cough", "muscle-pain"] },
+            { disease: "普通感冒", symptoms: ["fever", "cough", "runny-nose", "fatigue"] },
+            { disease: "诺如病毒感染", symptoms: ["fever", "diarrhea", "vomiting"] },
+            { disease: "呼吸道合胞病毒", symptoms: ["fever", "cough", "runny-nose"] },
+            { disease: "登革热", symptoms: ["fever", "headache", "joint-pain", "rash"] },
+            { disease: "疟疾", symptoms: ["fever", "headache", "muscle-pain"] },
+            { disease: "新冠感染", symptoms: ["fever", "cough", "fatigue", "headache"] }
+        ];
+
+        for (const pattern of diseasePatterns) {
+            if (pattern.symptoms.every(symptom => symptoms[symptom] === "yes")) {
+                return `根据您的症状，可能是${pattern.disease}。建议尽快就医。`;
+            }
+        }
+        return "您的症状不典型，可能是普通感冒或其他疾病。建议咨询医生。";
+    }
+</script>
+</body>
+</html>

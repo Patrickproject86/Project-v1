@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户反馈</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div class="page-container">
+    <header class="site-header">
+        <div class="header-logo">
+            <h1 class="site-title">常见传染病诊断&科普</h1>
+        </div>
+        <nav class="site-nav">
+            <ul>
+                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> 首页</a></li>
+                <li><a href="diagnosis.html" class="nav-link"><i class="fas fa-stethoscope"></i> 诊断页面</a></li>
+                <li><a href="popularize.html" class="nav-link"><i class="fas fa-book"></i> 科普页面</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="site-main">
+        <section class="feedback-section">
+            <h2>用户反馈</h2>
+            <form id="feedback-form">
+                <label for="name">姓名：</label>
+                <input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
+
+                <label for="email">邮箱：</label>
+                <input type="email" id="email" name="email" placeholder="请输入您的邮箱" required>
+
+                <label for="feedback">反馈内容：</label>
+                <textarea id="feedback" name="feedback" placeholder="请输入您的反馈内容" required></textarea>
+
+                <button type="submit">提交反馈</button>
+            </form>
+        </section>
+    </main>
+</div>
+
+<script>
+    document.getElementById('feedback-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表单默认提交行为
+
+        // 获取用户输入
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const feedback = document.getElementById('feedback').value;
+
+        alert(`感谢您的反馈！\n姓名：${name}\n邮箱：${email}\n反馈内容：${feedback}`);
+    });
+</script>
+</body>
+</html>
