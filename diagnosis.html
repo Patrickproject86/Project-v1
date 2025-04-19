@@ -132,29 +132,53 @@
         };
 
         // 调用诊断函数并显示结果
-        const result = diagnose(symptoms);
-        document.getElementById('result').innerText = result;
+        document.getElementById('result').innerText = diagnose(symptoms);
     });
 
     // 诊断函数
     function diagnose(symptoms) {
+        // 定义疾病模式及其症状权重
         const diseasePatterns = [
-            { disease: "甲型流感", symptoms: ["fever", "cough", "sore-throat", "muscle-pain"] },
-            { disease: "乙型流感", symptoms: ["fever", "cough", "muscle-pain"] },
-            { disease: "普通感冒", symptoms: ["fever", "cough", "runny-nose", "fatigue"] },
-            { disease: "诺如病毒感染", symptoms: ["fever", "diarrhea", "vomiting"] },
-            { disease: "呼吸道合胞病毒", symptoms: ["fever", "cough", "runny-nose"] },
-            { disease: "登革热", symptoms: ["fever", "headache", "joint-pain", "rash"] },
-            { disease: "疟疾", symptoms: ["fever", "headache", "muscle-pain"] },
-            { disease: "新冠感染", symptoms: ["fever", "cough", "fatigue", "headache"] }
+            { disease: "甲型流感", symptoms: { fever: 1, cough: 1, 'sore-throat': 1, 'muscle-pain': 1 }, weight: 0.8 },
+            { disease: "乙型流感", symptoms: { fever: 1, cough: 1, 'muscle-pain': 1 }, weight: 0.75 },
+            { disease: "普通感冒", symptoms: { fever: 0.5, cough: 1, 'runny-nose': 1, fatigue: 1 }, weight: 0.7 },
+            { disease: "诺如病毒感染", symptoms: { fever: 0.5, diarrhea: 1, vomiting: 1 }, weight: 0.85 },
+            { disease: "呼吸道合胞病毒", symptoms: { fever: 1, cough: 1, 'runny-nose': 1 }, weight: 0.7 },
+            { disease: "登革热", symptoms: { fever: 1, headache: 1, 'joint-pain': 1, rash: 1 }, weight: 0.9 },
+            { disease: "疟疾", symptoms: { fever: 1, headache: 1, 'muscle-pain': 1 }, weight: 0.8 },
+            { disease: "新冠感染", symptoms: { fever: 1, cough: 1, fatigue: 1, headache: 1 }, weight: 0.85 }
         ];
 
+        let maxScore = 0;
+        let diagnosedDisease = "未明确诊断";
+
+        // 计算每种疾病的匹配分数
         for (const pattern of diseasePatterns) {
-            if (pattern.symptoms.every(symptom => symptoms[symptom] === "yes")) {
-                return `根据您的症状，可能是${pattern.disease}。建议尽快就医。`;
+            let score = 0;
+            let totalWeight = 0;
+
+            for (const symptom in pattern.symptoms) {
+                if (symptoms[symptom] === "yes") {
+                    score += pattern.symptoms[symptom];
+                }
+                totalWeight += pattern.symptoms[symptom];
+            }
+
+            const matchScore = score / totalWeight * pattern.weight;
+
+            if (matchScore > maxScore) {
+                maxScore = matchScore;
+                diagnosedDisease = pattern.disease;
             }
         }
-        return "您的症状不典型，可能是普通感冒或其他疾病。建议咨询医生。";
+
+        if (maxScore > 0.7) {
+            return `根据您的症状，最可能的诊断是${diagnosedDisease}。建议尽快就医以进行进一步检查和确诊。`;
+        } else if (maxScore > 0.5) {
+            return `您的症状与${diagnosedDisease}有一定关联，但不确定。建议您咨询医生以获取专业意见。`;
+        } else {
+            return "您的症状不典型，可能是普通感冒或其他疾病。建议咨询医生。";
+        }
     }
 </script>
 </body>
