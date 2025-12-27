@@ -37,20 +37,86 @@
                 <button type="submit">提交反馈</button>
             </form>
         </section>
+
+        <section class="feedback-display">
+            <h2>用户反馈展示</h2>
+            <div id="feedback-list">
+                <p>正在加载反馈...</p>
+            </div>
+        </section>
     </main>
 </div>
 
 <script>
-    document.getElementById('feedback-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // 阻止表单默认提交行为
+    // 加载反馈数据
+    async function loadFeedback() {
+        try {
+            const response = await fetch('/api/feedback');
+            if (response.ok) {
+                const feedbacks = await response.json();
+                displayFeedback(feedbacks);
+            } else {
+                document.getElementById('feedback-list').innerHTML = '<p class="no-feedback">加载反馈失败</p>';
+            }
+        } catch (error) {
+            console.error('加载反馈失败:', error);
+            document.getElementById('feedback-list').innerHTML = '<p class="no-feedback">网络错误，无法加载反馈</p>';
+        }
+    }
 
-        // 获取用户输入
+    // 显示反馈数据
+    function displayFeedback(feedbacks) {
+        const feedbackList = document.getElementById('feedback-list');
+        
+        if (feedbacks.length === 0) {
+            feedbackList.innerHTML = '<p class="no-feedback">暂无用户反馈</p>';
+            return;
+        }
+
+        feedbackList.innerHTML = feedbacks.map(feedback => `
+            <div class="feedback-item">
+                <div class="feedback-header">
+                    <span class="feedback-author">${feedback.name}</span>
+                    <span class="feedback-date">${new Date(feedback.created_at).toLocaleString('zh-CN')}</span>
+                </div>
+                <div class="feedback-content">${feedback.feedback}</div>
+            </div>
+        `).join('');
+    }
+
+    // 提交反馈表单
+    document.getElementById('feedback-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const feedback = document.getElementById('feedback').value;
 
-        alert(`感谢您的反馈！\n姓名：${name}\n邮箱：${email}\n反馈内容：${feedback}`);
+        try {
+            const response = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, feedback })
+            });
+
+            if (response.ok) {
+                alert('感谢您的反馈！已成功提交。');
+                document.getElementById('feedback-form').reset();
+                // 重新加载反馈列表
+                loadFeedback();
+            } else {
+                alert('提交失败，请稍后重试。');
+            }
+        } catch (error) {
+            console.error('提交反馈失败:', error);
+            alert('网络错误，请稍后重试。');
+        }
     });
+
+    // 页面加载时获取反馈数据
+    document.addEventListener('DOMContentLoaded', loadFeedback);
 </script>
 </body>
 </html>
