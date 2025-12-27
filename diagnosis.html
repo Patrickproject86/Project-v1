@@ -106,34 +106,115 @@
             </form>
             <p id="result" style="margin-top: 20px; font-weight: bold; color: #333;"></p>
         </section>
+
+        <!-- 诊断记录展示区域 -->
+        <section class="diagnosis-records">
+            <h2>最近诊断记录</h2>
+            <div id="diagnosis-list">
+                <p>正在加载诊断记录...</p>
+            </div>
+        </section>
     </main>
-    <footer class="site-footer">
+    <!-- <footer class="site-footer">
         <a href="feedback.html" class="feedback-link">用户反馈 <i class="fas fa-comments"></i></a>
-    </footer>
+    </footer> -->
 </div>
 
 <script>
-    document.getElementById('diagnosis-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // 阻止表单默认提交行为
+    // 加载诊断记录
+    async function loadDiagnosisRecords() {
+        try {
+            const response = await fetch('/api/diagnosis');
+            if (response.ok) {
+                const records = await response.json();
+                displayDiagnosisRecords(records);
+            } else {
+                document.getElementById('diagnosis-list').innerHTML = '<p class="no-diagnosis">加载诊断记录失败</p>';
+            }
+        } catch (error) {
+            console.error('加载诊断记录失败:', error);
+            document.getElementById('diagnosis-list').innerHTML = '<p class="no-diagnosis">网络错误，无法加载诊断记录</p>';
+        }
+    }
 
-        // 获取用户输入的症状
-        const symptoms = {
-            fever: document.getElementById('fever').value,
-            cough: document.getElementById('cough').value,
-            'sore-throat': document.getElementById('sore-throat').value,
-            'muscle-pain': document.getElementById('muscle-pain').value,
-            fatigue: document.getElementById('fatigue').value,
-            'runny-nose': document.getElementById('runny-nose').value,
-            diarrhea: document.getElementById('diarrhea').value,
-            vomiting: document.getElementById('vomiting').value,
-            headache: document.getElementById('headache').value,
-            'joint-pain': document.getElementById('joint-pain').value,
-            rash: document.getElementById('rash').value
+    // 显示诊断记录
+    function displayDiagnosisRecords(records) {
+        console.log('开始显示诊断记录:', records);
+        const diagnosisList = document.getElementById('diagnosis-list');
+        
+        if (!diagnosisList) {
+            console.error('找不到 diagnosis-list 元素');
+            return;
+        }
+        
+        if (!records || records.length === 0) {
+            diagnosisList.innerHTML = '<p class="no-diagnosis">暂无诊断记录</p>';
+            return;
+        }
+
+        const recordsHTML = records.map(record => {
+            try {
+                console.log('处理记录:', record);
+                // 直接使用record.symptoms，因为从API返回的已经是对象
+                const symptoms = record.symptoms;
+                const positiveSymptoms = Object.entries(symptoms)
+                    .filter(([key, value]) => value === 'yes')
+                    .map(([key, value]) => getSymptomName(key));
+
+                console.log('正面症状:', positiveSymptoms);
+
+                return `
+                    <div class="diagnosis-item">
+                        <div class="diagnosis-header">
+                            <span class="diagnosis-date">${new Date(record.created_at).toLocaleString('zh-CN')}</span>
+                        </div>
+                        <div class="diagnosis-result">${record.result}</div>
+                        <div class="diagnosis-symptoms">
+                            <strong>症状：</strong>
+                            <div class="symptoms-list">
+                                ${positiveSymptoms.length > 0 
+                                    ? positiveSymptoms.map(symptom => `<span class="symptom-tag">${symptom}</span>`).join('') 
+                                    : '<span class="no-symptoms">无症状记录</span>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error('解析记录失败:', err, record);
+                return `
+                    <div class="diagnosis-item">
+                        <div class="diagnosis-header">
+                            <span class="diagnosis-date">${new Date(record.created_at).toLocaleString('zh-CN')}</span>
+                        </div>
+                        <div class="diagnosis-result">数据解析错误: ${err.message}</div>
+                    </div>
+                `;
+            }
+        }).join('');
+
+        console.log('生成的HTML:', recordsHTML);
+        diagnosisList.innerHTML = recordsHTML;
+        console.log('HTML已设置到页面');
+    }
+
+    // 症状名称映射
+    function getSymptomName(symptomKey) {
+        const symptomNames = {
+            'fever': '发热',
+            'cough': '咳嗽',
+            'sore-throat': '喉咙痛',
+            'muscle-pain': '肌肉酸痛',
+            'fatigue': '疲劳',
+            'runny-nose': '流鼻涕',
+            'diarrhea': '腹泻',
+            'vomiting': '呕吐',
+            'headache': '头痛',
+            'joint-pain': '关节痛',
+            'rash': '皮疹'
         };
-
-        // 调用诊断函数并显示结果
-        document.getElementById('result').innerText = diagnose(symptoms);
-    });
+        return symptomNames[symptomKey] || symptomKey;
+    }
 
     // 诊断函数
     function diagnose(symptoms) {
@@ -180,6 +261,53 @@
             return "您的症状不典型，可能是普通感冒或其他疾病。建议咨询医生。";
         }
     }
+
+    // 修改现有的表单提交事件，添加重新加载记录的功能
+    document.getElementById('diagnosis-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const symptoms = {
+            fever: document.getElementById('fever').value,
+            cough: document.getElementById('cough').value,
+            'sore-throat': document.getElementById('sore-throat').value,
+            'muscle-pain': document.getElementById('muscle-pain').value,
+            fatigue: document.getElementById('fatigue').value,
+            'runny-nose': document.getElementById('runny-nose').value,
+            diarrhea: document.getElementById('diarrhea').value,
+            vomiting: document.getElementById('vomiting').value,
+            headache: document.getElementById('headache').value,
+            'joint-pain': document.getElementById('joint-pain').value,
+            rash: document.getElementById('rash').value
+        };
+
+        const result = diagnose(symptoms);
+        document.getElementById('result').innerText = result;
+
+        // 保存到数据库
+        try {
+            const response = await fetch('/api/diagnosis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symptoms: symptoms,
+                    result: result
+                })
+            });
+
+            if (response.ok) {
+                console.log('诊断结果已保存到数据库');
+                // 重新加载诊断记录
+                loadDiagnosisRecords();
+            }
+        } catch (error) {
+            console.error('保存诊断结果失败:', error);
+        }
+    });
+
+    // 页面加载时获取诊断记录
+    document.addEventListener('DOMContentLoaded', loadDiagnosisRecords);
 </script>
 </body>
 </html>
